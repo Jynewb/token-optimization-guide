@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Token 优化测试框架</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --bg-tertiary: #e8e8ed;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --accent-blue: #0071e3;
+            --accent-green: #34c759;
+            --accent-orange: #ff9500;
+            --accent-purple: #af52de;
+            --accent-red: #ff3b30;
+            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            z-index: 1000;
+            padding: 0 48px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-logo {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 48px 80px;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 8vw, 72px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 24px);
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin-bottom: 48px;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-blue);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .section-desc {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Why Section */
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .why-card {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .why-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .why-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .why-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .why-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* User Profile Section */
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .profile-visual {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .profile-bar-label {
+            width: 100px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .profile-bar-track {
+            flex: 1;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .profile-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            transition: width 1s ease-out;
+        }
+
+        .profile-content h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .profile-list {
+            list-style: none;
+        }
+
+        .profile-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .profile-list li::before {
+            content: "✓";
+            color: var(--accent-green);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Core Insight - The Key Section */
+        .insight-section {
+            background: linear-gradient(135deg, #1d1d1f 0%, #2d2d30 100%);
+            color: white;
+            border-radius: 32px;
+            padding: 80px 64px;
+            margin: 0 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-section::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 113, 227, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .insight-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .insight-title {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .insight-quote {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 48px;
+            font-style: italic;
+            padding-left: 24px;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .insight-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .insight-item-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .insight-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .insight-item p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        /* Test Dimensions */
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .dimension-card {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .dimension-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .dimension-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dimension-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .dimension-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .dimension-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .dimension-token {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .token-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .token-high { background: var(--accent-red); }
+        .token-medium { background: var(--accent-orange); }
+        .token-low { background: var(--accent-green); }
+
+        /* Model Selection */
+        .models-table {
+            width: 100%;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .models-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .models-table th,
+        .models-table td {
+            padding: 20px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .models-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .models-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .models-table tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .model-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .model-provider {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .model-price {
+            font-size: 15px;
+        }
+
+        .model-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-free {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
+        }
+
+        .badge-cheap {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--accent-orange);
+        }
+
+        .badge-premium {
+            background: rgba(175, 82, 222, 0.1);
+            color: var(--accent-purple);
+        }
+
+        /* Methodology */
+        .methodology-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            position: relative;
+        }
+
+        .methodology-steps::before {
+            content: "";
+            position: absolute;
+            left: 28px;
+            top: 60px;
+            bottom: 60px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple));
+        }
+
+        .method-step {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-content {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .step-content h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        /* Output Section */
+        .outputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .output-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .output-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .output-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .output-card h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .output-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Task Analysis Table */
+        .task-analysis {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 48px;
+            margin-top: 80px;
+            overflow-x: auto;
+        }
+
+        .task-analysis h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .task-analysis-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .task-table th,
+        .task-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-tertiary);
+            vertical-align: top;
+        }
+
+        .task-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .task-table th:first-child {
+            width: 160px;
+        }
+
+        .task-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .task-table tr:hover td {
+            background: rgba(0, 113, 227, 0.02);
+        }
+
+        .task-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .task-desc {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        .model-recommend {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .model-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .medal {
+            font-size: 16px;
+        }
+
+        .model-name-cell {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--accent-green);
+        }
+
+        .model-desc {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+
+        .model-secondary .model-name-cell {
+            color: var(--accent-blue);
+        }
+
+        .model-avoid .model-name-cell {
+            color: var(--accent-red);
+        }
+
+        .key-point {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Quick Reference Card */
+        .quick-ref {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 48px;
+            margin-top: 80px;
+        }
+
+        .quick-ref h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .quick-ref-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .quick-ref-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+        }
+
+        .quick-ref-task {
+            font-weight: 500;
+        }
+
+        .quick-ref-model {
+            font-size: 14px;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            padding: 48px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        footer p {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scroll Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease-out;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 24px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 100px 24px 60px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            section {
+                padding: 60px 24px;
+            }
+
+            .insight-section {
+                margin: 0 24px;
+                padding: 48px 32px;
+            }
+
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .methodology-steps::before {
+                display: none;
+            }
+
+            .method-step {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-logo">OpenClaw Token 优化</div>
+        <div class="nav-links">
+            <a href="#why">为什么</a>
+            <a href="#insight">核心洞察</a>
+            <a href="#dimensions">测试维度</a>
+            <a href="#models">模型选择</a>
+            <a href="#method">方法论</a>
+            <a href="#output">产出</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span>🚀</span>
+            <span>OpenClaw 专属优化指南</span>
+        </div>
+        <h1>让每一颗 Token<br><span>都花在刀刃上</span></h1>
+        <p class="hero-subtitle">
+            系统性测试框架，帮助用户找到不同场景下的最优模型配置方案
+        </p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-number">7</div>
+                <div class="stat-label">独有测试场景</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">5+</div>
+                <div class="stat-label">模型对比</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">90%</div>
+                <div class="stat-label">潜在成本节省</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Section -->
+    <section id="why">
+        <div class="section-header">
+            <div class="section-tag">Why</div>
+            <h2 class="section-title">为什么这个测试很重要？</h2>
+            <p class="section-desc">成本差异巨大，用户痛点明确，市场缺乏系统性测试</p>
+        </div>
+        <div class="why-grid">
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon" style="background: rgba(255, 59, 48, 0.1);">💰</div>
+                <h3>成本差异巨大</h3>
+                <p>GPT-4 约 $10/百万 token，而国产模型免费或极便宜。选错模型可能浪费 10 倍成本。</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon" style="background: rgba(52, 199, 89, 0.1);">🎯</div>
+                <h3>痛点明确</h3>
+                <p>用户不知道什么场景用什么模型。简单任务用贵模型 = 浪费；复杂任务用便宜模型 = 失败。</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon" style="background: rgba(0, 113, 227, 0.1);">📊</div>
+                <h3>缺乏系统测试</h3>
+                <p>市面上没有针对 OpenClaw 场景的系统性 token 消耗测试，用户只能凭感觉配置。</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon" style="background: rgba(175, 82, 222, 0.1);">⚡</div>
+                <h3>实用价值高</h3>
+                <p>测试结果直接指导用户配置，每月可节省大量成本，提升使用体验。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Profile Section -->
+    <section id="users">
+        <div class="section-header">
+            <div class="section-tag">Who</div>
+            <h2 class="section-title">谁需要这个测试？</h2>
+            <p class="section-desc">三类核心用户，共同痛点：想省钱但不知道怎么配置</p>
+        </div>
+        <div class="profile-container">
+            <div class="profile-visual animate-on-scroll">
+                <div class="profile-chart">
+                    <div class="profile-bar">
+                        <span class="profile-bar-label">个人用户</span>
+                        <div class="profile-bar-track">
+                            <div class="profile-bar-fill" style="width: 70%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));">70%</div>
+                        </div>
+                    </div>
+                    <div class="profile-bar">
+                        <span class="profile-bar-label">小团队</span>
+                        <div class="profile-bar-track">
+                            <div class="profile-bar-fill" style="width: 55%; background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));">55%</div>
+                        </div>
+                    </div>
+                    <div class="profile-bar">
+                        <span class="profile-bar-label">开发者</span>
+                        <div class="profile-bar-track">
+                            <div class="profile-bar-fill" style="width: 40%; background: linear-gradient(90deg, var(--accent-orange), var(--accent-red));">40%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-content">
+                <h3>用户画像</h3>
+                <ul class="profile-list">
+                    <li><strong>个人用户</strong> - 想用 OpenClaw 提升效率，但担心成本失控</li>
+                    <li><strong>小团队</strong> - 每月账单模糊，想找到最优配置方案</li>
+                    <li><strong>开发者</strong> - 需要了解不同模型的能力边界和性价比</li>
+                    <li><strong>共同痛点</strong> - 不知道什么任务用什么模型最划算</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Insight Section -->
+    <div class="insight-section" id="insight">
+        <div class="insight-tag">💡 核心洞察</div>
+        <h2 class="insight-title">普通问答不是测试重点<br>OpenClaw 独有场景才是</h2>
+        <p class="insight-quote">
+            "用户可以用免费云端大模型做普通问答，不存在 token 痛点。只有 OpenClaw 独有能力的任务才是真正的测试重点。"
+        </p>
+        <div class="insight-grid">
+            <div class="insight-item">
+                <div class="insight-item-icon">🔧</div>
+                <h4>工具调用</h4>
+                <p>exec、read、write 等操作，每次调用都有返回内容进入上下文</p>
+            </div>
+            <div class="insight-item">
+                <div class="insight-item-icon">🌐</div>
+                <h4>浏览器自动化</h4>
+                <p>snapshot 返回巨大 DOM 结构，可能几万字符进入上下文</p>
+            </div>
+            <div class="insight-item">
+                <div class="insight-item-icon">📁</div>
+                <h4>文件读写</h4>
+                <p>文件内容全部进入上下文，大文件消耗巨大</p>
+            </div>
+            <div class="insight-item">
+                <div class="insight-item-icon">👁️</div>
+                <h4>视觉分析</h4>
+                <p>图片描述占用上下文，后续分析持续消耗</p>
+            </div>
+            <div class="insight-item">
+                <div class="insight-item-icon">🔄</div>
+                <h4>多轮任务</h4>
+                <p>上下文累积膨胀，历史消息越来越多</p>
+            </div>
+            <div class="insight-item">
+                <div class="insight-item-icon">💓</div>
+                <h4>Heartbeat 检查</h4>
+                <p>每次都要读配置文件，持续消耗 token</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Dimensions Section -->
+    <section id="dimensions">
+        <div class="section-header">
+            <div class="section-tag">What</div>
+            <h2 class="section-title">测试维度设计</h2>
+            <p class="section-desc">7 个 OpenClaw 独有场景，覆盖真实使用情况</p>
+        </div>
+        <div class="dimensions-grid">
+            <div class="dimension-card animate-on-scroll">
+                <div class="dimension-header">
+                    <div class="dimension-icon" style="background: rgba(255, 59, 48, 0.1);">🔧</div>
+                    <div class="dimension-title">工具调用</div>
+                </div>
+                <p class="dimension-desc">执行命令、操作文件、系统交互。测试工具调用成功率、返回结果处理能力、Token 消耗。</p>
+                <div class="dimension-token">
+                    <span class="token-dot token-high"></span>
+                    <span>Token 消耗：高</span>
+                </div>
+            </div>
+            <div class="dimension-card animate-on-scroll">
+                <div class="dimension-header">
+                    <div class="dimension-icon" style="background: rgba(255, 149, 0, 0.1);">🌐</div>
+                    <div class="dimension-title">浏览器自动化</div>
+                </div>
+                <p class="dimension-desc">打开网页、填写表单、抓取数据。测试 snapshot 处理能力、DOM 解析准确性。</p>
+                <div class="dimension-token">
+                    <span class="token-dot token-high"></span>
+                    <span>Token 消耗：极高</span>
+                </div>
+            </div>
+            <div class="dimension-card animate-on-scroll">
+                <div class="dimension-header">
+                    <div class="dimension-icon" style="background: rgba(52, 199, 89, 0.1);">📁</div>
+                    <div class="dimension-title">文件读写</div>
+                </div>
+                <p class="dimension-desc">读取大文件、分析代码、处理日志。测试文件处理能力、内容提取准确性。</p>
+                <div class="dimension-token">
+                    <span class="token-dot token-high"></span>
+                    <span>Token 消耗：高</span>
+                </div>
+            </div>
+            <div class="dimension-card animate-on-scroll">
+                <div class="dimension-header">
+                    <div class="dimension-icon" style="background: rgba(175, 82, 222, 0.1);">👁️</div>
+                    <div class="dimension-title">视觉分析</div>
+                </div>
+                <p class="dimension-desc">图片识别、OCR 提取、截图分析。测试图片理解能力、文字提取准确性。</p>
+                <div class="dimension-token">
+                    <span class="token-dot token-medium"></span>
+                    <span>Token 消耗：中</span>
+                </div>
+            </div>
+            <div class="dimension-card animate-on-scroll">
+                <div class="dimension-header">
+                    <div class="dimension-icon" style="background: rgba(0, 113, 227, 0.1);">🔄</div>
+                    <div class="dimension-title">多轮复杂任务</div>
+                </div>
+                <p class="dimension-desc">任务分解、连续操作、上下文累积。测试长对话能力、任务完成质量。</p>
+                <div class="dimension-token">
+                    <span class="token-dot token-high"></span>
+                    <span>Token 消耗：高</span>
+                </div>
+            </div>
+            <div class="dimension-card animate-on-scroll">
+                <div class="dimension-header">
+                    <div class="dimension-icon" style="background: rgba(88, 86, 214, 0.1);">💓</div>
+                    <div class="dimension-title">Heartbeat 检查</div>
+                </div>
+                <p class="dimension-desc">定时任务、自动检查、状态监控。测试轻量任务处理能力、配置文件读取。</p>
+                <div class="dimension-token">
+                    <span class="token-dot token-low"></span>
+                    <span>Token 消耗：低</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Selection Section -->
+    <section id="models">
+        <div class="section-header">
+            <div class="section-tag">Models</div>
+            <h2 class="section-title">模型选择</h2>
+            <p class="section-desc">国产性价比大模型 + 本地免费部署，覆盖不同价位和能力</p>
+        </div>
+        <div class="models-table animate-on-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>模型</th>
+                        <th>提供商</th>
+                        <th>价格</th>
+                        <th>定位</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="model-name">Ollama（本地）</div>
+                            <div class="model-provider">本地部署</div>
+                        </td>
+                        <td class="model-price">免费</td>
+                        <td><span class="model-badge badge-free">免费</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="model-name">GLM-5</div>
+                            <div class="model-provider">智谱 AI</div>
+                        </td>
+                        <td class="model-price">¥0.001/千token</td>
+                        <td><span class="model-badge badge-cheap">性价比</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="model-name">Kimi</div>
+                            <div class="model-provider">Moonshot</div>
+                        </td>
+                        <td class="model-price">¥0.012/千token</td>
+                        <td><span class="model-badge badge-cheap">长文本</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="model-name">通义千问</div>
+                            <div class="model-provider">阿里云</div>
+                        </td>
+                        <td class="model-price">¥0.002/千token</td>
+                        <td><span class="model-badge badge-cheap">全能</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="model-name">MiniMax</div>
+                            <div class="model-provider">MiniMax</div>
+                        </td>
+                        <td class="model-price">¥0.015/千token</td>
+                        <td><span class="model-badge badge-premium">高级</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Methodology Section -->
+    <section id="method">
+        <div class="section-header">
+            <div class="section-tag">How</div>
+            <h2 class="section-title">测试方法论</h2>
+            <p class="section-desc">科学、严谨、可复现的测试流程</p>
+        </div>
+        <div class="methodology-steps">
+            <div class="method-step animate-on-scroll">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>控制变量</h4>
+                    <p>相同任务、相同上下文、相同配置。每次只改变一个变量（模型），确保测试公平。</p>
+                </div>
+            </div>
+            <div class="method-step animate-on-scroll">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>记录指标</h4>
+                    <p>输入 Token 数、输出 Token 数、总 Token 数、响应时间、任务完成质量（人工评分 1-5）。</p>
+                </div>
+            </div>
+            <div class="method-step animate-on-scroll">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>重复测试</h4>
+                    <p>每个场景测试 3 次，取平均值。排除异常值，确保数据可靠。</p>
+                </div>
+            </div>
+            <div class="method-step animate-on-scroll">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>新会话测试</h4>
+                    <p>每次测试使用新会话，避免上下文累积干扰。确保 Token 数据干净。</p>
+                </div>
+            </div>
+            <div class="method-step animate-on-scroll">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>记录与对比</h4>
+                    <p>将所有数据记录到表格，横向对比不同模型在同一场景的表现。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Output Section -->
+    <section id="output">
+        <div class="section-header">
+            <div class="section-tag">Output</div>
+            <h2 class="section-title">最终产出</h2>
+            <p class="section-desc">测试完成后，交付以下成果</p>
+        </div>
+        <div class="outputs-grid">
+            <div class="output-card animate-on-scroll">
+                <div class="output-icon">📋</div>
+                <h4>场景-模型推荐表</h4>
+                <p>什么场景用什么模型，一目了然</p>
+            </div>
+            <div class="output-card animate-on-scroll">
+                <div class="output-icon">📊</div>
+                <h4>Token 消耗对比图</h4>
+                <p>可视化展示不同模型的消耗差异</p>
+            </div>
+            <div class="output-card animate-on-scroll">
+                <div class="output-icon">🧮</div>
+                <h4>成本计算器</h4>
+                <p>用户输入场景 → 输出推荐配置</p>
+            </div>
+            <div class="output-card animate-on-scroll">
+                <div class="output-icon">📖</div>
+                <h4>最佳实践指南</h4>
+                <p>具体配置建议和使用技巧</p>
+            </div>
+        </div>
+
+        <!-- Task Analysis Table -->
+        <div class="task-analysis">
+            <h3>📊 Token 消耗与性价比任务分析表（预期输出格式）</h3>
+            <p class="task-analysis-subtitle">测试完成后，按此格式呈现各任务类型的最优模型推荐</p>
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>任务类型</th>
+                        <th>🥇 性价比最高</th>
+                        <th>🥈 次选</th>
+                        <th>⚠️ 不推荐</th>
+                        <th>关键说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="task-name">长文本分析</div>
+                            <div class="task-desc">整本PDF/代码库</div>
+                        </td>
+                        <td class="model-recommend model-top">
+                            <div class="model-top">
+                                <span class="medal">🥇</span>
+                                <span class="model-name-cell">MiniMax</span>
+                            </div>
+                            <div class="model-desc">$0.20输入 + 400万上下文</div>
+                        </td>
+                        <td class="model-recommend model-secondary">
+                            <div class="model-name-cell">Kimi K2.5</div>
+                            <div class="model-desc">256K上下文足够</div>
+                        </td>
+                        <td class="model-recommend model-avoid">
+                            <div class="model-name-cell">Qwen3-Max</div>
+                            <div class="model-desc">上下文小且贵</div>
+                        </td>
+                        <td class="key-point">MiniMax的400万上下文可一次性处理整本教科书，成本仅$0.8</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">复杂编程/Agent</div>
+                            <div class="task-desc">代码生成/调试</div>
+                        </td>
+                        <td class="model-recommend model-top">
+                            <div class="model-top">
+                                <span class="medal">🥇</span>
+                                <span class="model-name-cell">GLM-5</span>
+                            </div>
+                            <div class="model-desc">Agent编程第一，单次$0.14</div>
+                        </td>
+                        <td class="model-recommend model-secondary">
+                            <div class="model-name-cell">Kimi K2.5</div>
+                            <div class="model-desc">Agent Swarm并行快</div>
+                        </td>
+                        <td class="model-recommend model-avoid">
+                            <div class="model-name-cell">Qwen3-Max</div>
+                            <div class="model-desc">编程非最强但最贵</div>
+                        </td>
+                        <td class="key-point">GLM-5在SWE-Bench达88.2%，编程成本仅为Opus的1/45</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">多模态/视觉编码</div>
+                            <div class="task-desc">图片/视频→代码</div>
+                        </td>
+                        <td class="model-recommend model-top">
+                            <div class="model-top">
+                                <span class="medal">🥇</span>
+                                <span class="model-name-cell">Kimi K2.5</span>
+                            </div>
+                            <div class="model-desc">原生多模态+视频转代码</div>
+                        </td>
+                        <td class="model-recommend model-secondary">
+                            <div class="model-name-cell">Qwen3-VL</div>
+                            <div class="model-desc">视觉特化版</div>
+                        </td>
+                        <td class="model-recommend model-avoid">
+                            <div class="model-name-cell">GLM-5</div>
+                            <div class="model-desc">侧重代码非视觉</div>
+                        </td>
+                        <td class="key-point">Kimi支持视频直接生成前端代码，适合UI重构</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">企业知识库/RAG</div>
+                            <div class="task-desc">文档检索/问答</div>
+                        </td>
+                        <td class="model-recommend model-top">
+                            <div class="model-top">
+                                <span class="medal">🥇</span>
+                                <span class="model-name-cell">MiniMax</span>
+                            </div>
+                            <div class="model-desc">超长上下文减少切片</div>
+                        </td>
+                        <td class="model-recommend model-secondary">
+                            <div class="model-name-cell">Qwen3-Max</div>
+                            <div class="model-desc">RAG优化但贵</div>
+                        </td>
+                        <td class="model-recommend model-avoid">
+                            <div class="model-name-cell">GLM-5</div>
+                            <div class="model-desc">提价后性价比下降</div>
+                        </td>
+                        <td class="key-point">MiniMax长上下文可避免文档切片，精度更高</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">高并发简单任务</div>
+                            <div class="task-desc">Heartbeat/轻量命令</div>
+                        </td>
+                        <td class="model-recommend model-top">
+                            <div class="model-top">
+                                <span class="medal">🥇</span>
+                                <span class="model-name-cell">Ollama</span>
+                            </div>
+                            <div class="model-desc">本地免费部署</div>
+                        </td>
+                        <td class="model-recommend model-secondary">
+                            <div class="model-name-cell">MiniMax</div>
+                            <div class="model-desc">云端成本最低</div>
+                        </td>
+                        <td class="model-recommend model-avoid">
+                            <div class="model-name-cell">GLM-5</div>
+                            <div class="model-desc">价格大幅上涨</div>
+                        </td>
+                        <td class="key-point">Ollama完全免费，适合Heartbeat等高频轻量任务</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="task-name">数学/科学推理</div>
+                            <div class="task-desc">复杂计算/推理</div>
+                        </td>
+                        <td class="model-recommend model-top">
+                            <div class="model-top">
+                                <span class="medal">🥇</span>
+                                <span class="model-name-cell">Kimi K2.5</span>
+                            </div>
+                            <div class="model-desc">AIME 96.1%，思考模式</div>
+                        </td>
+                        <td class="model-recommend model-secondary">
+                            <div class="model-name-cell">Qwen3-Max</div>
+                            <div class="model-desc">思考模式强但贵</div>
+                        </td>
+                        <td class="model-recommend model-avoid">
+                            <div class="model-name-cell">MiniMax</div>
+                            <div class="model-desc">基础推理较弱</div>
+                        </td>
+                        <td class="key-point">Kimi的Thinking模式在数学竞赛表现接近o1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>OpenClaw Token 优化测试框架 · 2026 · 让每一颗 Token 都花在刀刃上</p>
+    </footer>
+
+    <script>
+        // Scroll Animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Profile bars animation
+        const profileObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bars = entry.target.querySelectorAll('.profile-bar-fill');
+                    bars.forEach(bar => {
+                        const width = bar.style.width;
+                        bar.style.width = '0%';
+                        setTimeout(() => {
+                            bar.style.width = width;
+                        }, 200);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const profileChart = document.querySelector('.profile-chart');
+        if (profileChart) {
+            profileObserver.observe(profileChart.parentElement);
+        }
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                const target = document.querySelector(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
